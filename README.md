@@ -18,7 +18,7 @@ not have enough time to write them. I relied on hints given by project
 documents and the grade given to me by the professor to know if the code
 was working correctly.
 
-# 🧮 Building the Project
+## 🧮 Building the Project
 
 Building this project is simple, and can be done  following the
 instructions below:
@@ -37,7 +37,7 @@ chmod +x ./gradlew # unix only
 ./gradlew publishToMavenLocal
 ```
 
-# 📊 Running the Clustering Program
+## 📊 Running the Clustering Program
 
 There is a main method in `ClusterProgram`.
 

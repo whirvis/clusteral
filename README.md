@@ -5,6 +5,7 @@
 </div>
 
 # The Project
+
 This is the semester long project for a graduate class in
 [cluster analysis](https://en.wikipedia.org/wiki/Cluster_analysis) at my
 university. The code remains unchanged since it's final submission, except
@@ -20,12 +21,11 @@ was working correctly.
 
 ## 🧮 Building the Project
 
-Building this project is simple, and can be done  following the
-instructions below:
+Building this project is simple. Just follow these steps:
 
-1. Install [Git](https://git-scm.com/) if not done so already.
+1. Install [Git](https://git-scm.com/) if not done so already. 
 2. Install the JDK. Builds of the OpenJDK can be found [here](https://adoptium.net/).
-3. Open a terminal of your choice and run the following commands:
+3. Open a terminal of your choice and run the commands below.
 
 ```bash
 git clone https://github.com/whirvis/clusteral
@@ -39,9 +39,9 @@ chmod +x ./gradlew # unix only
 
 ## 📊 Running the Clustering Program
 
-There is a main method in `ClusteringProgram`. It should be executable out of
-the box, so long as valid arguments are given. The parameters are documented
-in `ClusteringParams`. An example of valid CLI arguments would be:
+There is a main method in `ClusteringProgram`. It should be executable out
+of the box with valid arguments. Parameters are listed in `ClusteringParams`.
+An example of valid CLI arguments are given below.
 
 ```bash
 java -jar clusteral.jar                                                    \

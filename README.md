@@ -62,7 +62,7 @@ subsequent lines for each data point. An example is listed below.
 Note the contents of the first line. The first number is how many data
 points there are, the second number is how many dimensions each point has,
 and the third number is the number of true clusters. **Keep in mind that
-the true cluster is also one of the axes.** It is always the last axis of
+the true cluster is also one of the axes!** It is always the last axis of
 each point.
 
 ## 📊 Running the Clustering Program
@@ -87,4 +87,10 @@ java -jar clusteral.jar                                                    \
     stdout            # W: where to write program output        (optional)
 ```
 
-Both classes are in the `io.whirvis.edu.clustering.cli` package.
+Both classes are in the `io.whirvis.edu.clustering.cli` package of the `cli`
+module.
+
+⚠️ **Note:** When running the clustering program, you may encounter an error
+saying: "Unable to repair cluster with a coincidence center". This usually
+means you got unlucky with the centroids chosen by the program. However, if
+it fails more often than not, your dataset may not have enough data points.

@@ -23,8 +23,12 @@
  */
 package io.whirvis.edu.clustering;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -40,6 +44,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 @SuppressWarnings("unused")
 public final class PointCluster implements Iterable<DataPoint> {
+
+    private static final Lock POINT_FORMAT_LOCK = new ReentrantLock();
+    private static final DecimalFormat POINT_FORMAT = new DecimalFormat(
+            "#.#", DecimalFormatSymbols.getInstance(Locale.US));
 
     private final PointClusters group;
     private final int index;
@@ -352,6 +360,70 @@ public final class PointCluster implements Iterable<DataPoint> {
         return this.getMeanDistance(centroid);
     }
 
+    private double getSingleLinkageDistance(
+            PointCluster cluster) {
+        double lowest = Double.MAX_VALUE;
+        for (DataPoint ourPoint : points) {
+            for (DataPoint theirPoint : cluster) {
+                double dist = ourPoint.squaredError(theirPoint);
+                if (dist < lowest) {
+                    lowest = dist;
+                }
+            }
+        }
+        return lowest;
+    }
+
+    private double getCompleteLinkageDistance(
+            PointCluster cluster) {
+        double greatest = Double.MIN_VALUE;
+        for (DataPoint ourPoint : points) {
+            for (DataPoint theirPoint : cluster) {
+                double dist = ourPoint.squaredError(theirPoint);
+                if (dist > greatest) {
+                    greatest = dist;
+                }
+            }
+        }
+        return greatest;
+    }
+
+    private double getAverageLinkageDistance(
+            PointCluster cluster) {
+        double total = 0.0d;
+        for (DataPoint ourPoint : points) {
+            for (DataPoint theirPoint : cluster) {
+                double dist = ourPoint.squaredError(theirPoint);
+                total += dist;
+            }
+        }
+        int observations = this.getPointCount()
+                * cluster.getPointCount();
+        return total / observations;
+    }
+
+    private double getCentroidLinkageDistance(
+            PointCluster cluster) {
+        DataPoint theirCentroid = cluster.getCentroid();
+        return centroid.squaredError(theirCentroid);
+    }
+
+    private double getAverageCentroidsLinkageDistance(
+            PointCluster cluster) {
+        double total = 0.0d;
+        DataPoint ourCentroid = this.getCentroid();
+        for (DataPoint theirPoint : cluster) {
+            total += theirPoint.squaredError(ourCentroid);
+        }
+        DataPoint theirCentroid = cluster.getCentroid();
+        for (DataPoint ourPoint : points) {
+            total += ourPoint.squaredError(theirCentroid);
+        }
+        int observations = this.getPointCount()
+                * cluster.getPointCount();
+        return total / observations;
+    }
+
     /**
      * Returns the distance between this cluster and another cluster based
      * on the given method.
@@ -372,70 +444,60 @@ public final class PointCluster implements Iterable<DataPoint> {
 
         sharedPointLock.readLock().lock();
         try {
-            if (linkage == LinkageMethod.SINGLE_LINKAGE) {
-                double lowest = Double.MAX_VALUE;
-                for (DataPoint ourPoint : points) {
-                    for (DataPoint theirPoint : cluster) {
-                        double dist = ourPoint.squaredError(theirPoint);
-                        if (dist < lowest) {
-                            lowest = dist;
-                        }
-                    }
-                }
-                return lowest;
-            }
-
-            if (linkage == LinkageMethod.COMPLETE_LINKAGE) {
-                double greatest = Double.MIN_VALUE;
-                for (DataPoint ourPoint : points) {
-                    for (DataPoint theirPoint : cluster) {
-                        double dist = ourPoint.squaredError(theirPoint);
-                        if (dist > greatest) {
-                            greatest = dist;
-                        }
-                    }
-                }
-                return greatest;
-            }
-
-            if (linkage == LinkageMethod.AVERAGE_LINKAGE) {
-                double total = 0.0d;
-                for (DataPoint ourPoint : points) {
-                    for (DataPoint theirPoint : cluster) {
-                        double dist = ourPoint.squaredError(theirPoint);
-                        total += dist;
-                    }
-                }
-                int observations = this.getPointCount()
-                        * cluster.getPointCount();
-                return total / observations;
-            }
-
-            if (linkage == LinkageMethod.CENTROID_LINKAGE) {
-                DataPoint theirCentroid = cluster.getCentroid();
-                return centroid.squaredError(theirCentroid);
-            }
-
-            if (linkage == LinkageMethod.AVERAGE_CENTROIDS_LINKAGE) {
-                double total = 0.0d;
-                DataPoint ourCentroid = this.getCentroid();
-                for (DataPoint theirPoint : cluster) {
-                    total += theirPoint.squaredError(ourCentroid);
-                }
-                DataPoint theirCentroid = cluster.getCentroid();
-                for (DataPoint ourPoint : points) {
-                    total += ourPoint.squaredError(theirCentroid);
-                }
-                int observations = this.getPointCount()
-                        * cluster.getPointCount();
-                return total / observations;
+            switch (linkage) {
+                case SINGLE_LINKAGE:
+                    return this.getSingleLinkageDistance(cluster);
+                case COMPLETE_LINKAGE:
+                    return this.getCompleteLinkageDistance(cluster);
+                case AVERAGE_LINKAGE:
+                    return this.getAverageLinkageDistance(cluster);
+                case CENTROID_LINKAGE:
+                    return this.getCentroidLinkageDistance(cluster);
+                case AVERAGE_CENTROIDS_LINKAGE:
+                    return this.getAverageCentroidsLinkageDistance(cluster);
+                default:
+                    String msg = "Unexpected case, this is a bug";
+                    throw new UnsupportedOperationException(msg);
             }
         } finally {
             sharedPointLock.readLock().unlock();
         }
+    }
 
-        String msg = linkage + " not implemented, this is a bug";
-        throw new RuntimeException(msg); /* this should not occur */
+    private double getCompleteDiameter() {
+        double greatest = Double.MIN_VALUE;
+        for (DataPoint outer : points) {
+            for (DataPoint inner : points) {
+                double dist = outer.squaredError(inner);
+                if (dist > greatest) {
+                    greatest = dist;
+                }
+            }
+        }
+        return greatest;
+    }
+
+    private double getAverageDiameter() {
+        double total = 0.0d;
+        for (DataPoint outer : points) {
+            for (DataPoint inner : points) {
+                double dist = outer.squaredError(inner);
+                total += dist;
+            }
+        }
+        int observations = this.getPointCount()
+                * (this.getPointCount() - 1);
+        return total / observations;
+    }
+
+    private double getCentroidDiameter() {
+        double total = 0.0d;
+        for (DataPoint point : points) {
+            double dist = point.squaredError(centroid);
+            total += dist;
+        }
+        int observations = this.getPointCount();
+        return 2 * (total / observations);
     }
 
     /**
@@ -455,47 +517,20 @@ public final class PointCluster implements Iterable<DataPoint> {
 
         sharedPointLock.readLock().lock();
         try {
-            if (diameter == DiameterMethod.COMPLETE) {
-                double greatest = Double.MIN_VALUE;
-                for (DataPoint outer : points) {
-                    for (DataPoint inner : points) {
-                        double dist = outer.squaredError(inner);
-                        if (dist > greatest) {
-                            greatest = dist;
-                        }
-                    }
-                }
-                return greatest;
-            }
-
-            if (diameter == DiameterMethod.AVERAGE) {
-                double total = 0.0d;
-                for (DataPoint outer : points) {
-                    for (DataPoint inner : points) {
-                        double dist = outer.squaredError(inner);
-                        total += dist;
-                    }
-                }
-                int observations = this.getPointCount()
-                        * (this.getPointCount() - 1);
-                return total / observations;
-            }
-
-            if (diameter == DiameterMethod.CENTROID) {
-                double total = 0.0d;
-                for (DataPoint point : points) {
-                    double dist = point.squaredError(centroid);
-                    total += dist;
-                }
-                int observations = this.getPointCount();
-                return 2 * (total / observations);
+            switch (diameter) {
+                case COMPLETE:
+                    return this.getCompleteDiameter();
+                case AVERAGE:
+                    return this.getAverageDiameter();
+                case CENTROID:
+                    return this.getCentroidDiameter();
+                default:
+                    String msg = "Unexpected case, this is a bug";
+                    throw new UnsupportedOperationException(msg);
             }
         } finally {
             sharedPointLock.readLock().unlock();
         }
-
-        String msg = diameter + " not implemented, this is a bug";
-        throw new RuntimeException(msg); /* this should not occur */
     }
 
     /**
@@ -651,6 +686,15 @@ public final class PointCluster implements Iterable<DataPoint> {
         } finally {
             thisClusterLock.readLock().unlock();
             sharedPointLock.readLock().unlock();
+        }
+    }
+
+    private static String formatPoint(double number) {
+        POINT_FORMAT_LOCK.lock();
+        try {
+            return POINT_FORMAT.format(number);
+        } finally {
+            POINT_FORMAT_LOCK.unlock();
         }
     }
 

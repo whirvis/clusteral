@@ -3,8 +3,8 @@ rootProject.name = "clusteral"
 include(
     ":cli",
     ":cli:args",
-    ":clustering",
-    ":kmeans",
+    ":api",
+    ":api:kmeans",
+    ":api:validator",
     ":util",
-    ":validator",
 )

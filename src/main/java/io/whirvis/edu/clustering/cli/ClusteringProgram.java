@@ -186,7 +186,7 @@ public final class ClusteringProgram {
         KMeansRuns runs = KMeans.perform(pointFile, args);
         ClusteringResults results = new ClusteringResults(pointFile,
                 args.normalizationType, validator, runs, args.initMethod);
-        results.print(out, args.outputMode);
+        results.print(out);
 
         if (out != stdout && out != stderr) {
             out.close();

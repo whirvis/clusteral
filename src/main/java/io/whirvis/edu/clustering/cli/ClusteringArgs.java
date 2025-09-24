@@ -68,11 +68,6 @@ public final class ClusteringArgs {
     public final int numRuns;
 
     /**
-     * Argument for {@link ClusteringParams#OUTPUT_MODE}.
-     */
-    public final OutputMode outputMode;
-
-    /**
      * Argument for {@link ClusteringParams#K_MEANS_INIT_METHOD}.
      */
     public final KMeansInitMethod initMethod;
@@ -113,14 +108,13 @@ public final class ClusteringArgs {
         this.maxIterations = args.get(ClusteringParams.MAX_ITERATIONS);
         this.convergenceThreshold = args.get(ClusteringParams.CONVERGENCE_THRESHOLD);
         this.numRuns = args.get(ClusteringParams.NUM_RUNS);
-        this.outputMode = args.get(ClusteringParams.OUTPUT_MODE);
         this.initMethod = args.get(ClusteringParams.K_MEANS_INIT_METHOD);
         this.normalizationType = args.get(ClusteringParams.NORMALIZATION_TYPE);
         this.validatorFormula = args.get(ClusteringParams.VALIDATOR_FORMULA);
         this.diameterMethod = args.get(ClusteringParams.DIAMETER_METHOD);
 
         /* optional argument */
-        if (args.getParamCount() >= 11) {
+        if (args.getParamCount() >= 10) {
             this.linkageMethod = args.get(
                     ClusteringParams.LINKAGE_METHOD);
         } else {
@@ -128,7 +122,7 @@ public final class ClusteringArgs {
         }
 
         /* optional argument */
-        if (args.getParamCount() >= 12) {
+        if (args.getParamCount() >= 11) {
             this.chooseRandomCentroidOnMultipleNearest = args.get(
                     ClusteringParams.CHOOSE_RANDOM_CENTROID_ON_MULTIPLE_NEAREST);
         } else {
@@ -136,7 +130,7 @@ public final class ClusteringArgs {
         }
 
         /* optional argument */
-        if (args.getParamCount() >= 13) {
+        if (args.getParamCount() >= 12) {
             this.outputDestination = args.get(
                     ClusteringParams.OUTPUT_DESTINATION);
         } else {
@@ -168,11 +162,10 @@ public final class ClusteringArgs {
         args.add(2, ClusteringParams.MAX_ITERATIONS);
         args.add(3, ClusteringParams.CONVERGENCE_THRESHOLD);
         args.add(4, ClusteringParams.NUM_RUNS);
-        args.add(5, ClusteringParams.OUTPUT_MODE);
-        args.add(6, ClusteringParams.K_MEANS_INIT_METHOD);
-        args.add(7, ClusteringParams.NORMALIZATION_TYPE);
-        args.add(8, ClusteringParams.VALIDATOR_FORMULA);
-        args.add(9, ClusteringParams.DIAMETER_METHOD);
+        args.add(5, ClusteringParams.K_MEANS_INIT_METHOD);
+        args.add(6, ClusteringParams.NORMALIZATION_TYPE);
+        args.add(7, ClusteringParams.VALIDATOR_FORMULA);
+        args.add(8, ClusteringParams.DIAMETER_METHOD);
 
         if (javaArgs.length < args.getParamCount()) {
             err.println("Usage: " + args.getUsage());
@@ -181,17 +174,17 @@ public final class ClusteringArgs {
 
         /* optional argument */
         if (javaArgs.length >= args.getParamCount() + 1) {
-            args.add(10, ClusteringParams.LINKAGE_METHOD);
+            args.add(9, ClusteringParams.LINKAGE_METHOD);
         }
 
         /* optional argument */
         if (javaArgs.length >= args.getParamCount() + 1) {
-            args.add(11, ClusteringParams.CHOOSE_RANDOM_CENTROID_ON_MULTIPLE_NEAREST);
+            args.add(10, ClusteringParams.CHOOSE_RANDOM_CENTROID_ON_MULTIPLE_NEAREST);
         }
 
         /* optional argument */
         if (javaArgs.length >= args.getParamCount() + 1) {
-            args.add(12, ClusteringParams.OUTPUT_DESTINATION);
+            args.add(11, ClusteringParams.OUTPUT_DESTINATION);
         }
 
         try {

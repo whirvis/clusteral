@@ -46,7 +46,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Contains the results of running {@link ClusteringProgram}.
  *
- * @see #print(OutputStream, OutputMode)
+ * @see #print(OutputStream)
  */
 public final class ClusteringResults {
 
@@ -116,13 +116,7 @@ public final class ClusteringResults {
         this.runs = runs;
     }
 
-    /* TODO: implement */
-    @SuppressWarnings("unused")
-    private void printCsvResults(OutputStream out) {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    private void printHumanReadableResults(KMeansRun run, PrintStream ps) {
+    private void print(KMeansRun run, PrintStream ps) {
         ps.println("Run " + (run.runNum + 1));
         ps.println("-----");
 
@@ -155,7 +149,15 @@ public final class ClusteringResults {
         ps.println(); /* separator line */
     }
 
-    private void printHumanReadableResults(OutputStream out) {
+    /**
+     * Prints the results of the clustering program.
+     *
+     * @param out where to write the output.
+     * @throws NullPointerException If {@code out} is {@code null}.
+     */
+    public void print(OutputStream out) {
+        Objects.requireNonNull(out, "out cannot be null");
+
         if (validator.getType() == ClusterValidatorType.EXTERNAL
                 && !pointFile.areTrueClustersKnown()) {
             throw new IllegalStateException("Cannot calculate the"
@@ -166,7 +168,7 @@ public final class ClusteringResults {
         PrintStream ps = new PrintStream(out);
 
         for (KMeansRun run : runs) {
-            printHumanReadableResults(run, ps);
+            print(run, ps);
         }
 
         ps.println("Additional Notes\n"
@@ -175,30 +177,6 @@ public final class ClusteringResults {
                 + "Initialized with: " + initMethod + "\n"
                 + "Using validator:  " + validator.getName() + "\n"
                 + "-----");
-    }
-
-    /**
-     * Prints the results of the clustering program.
-     *
-     * @param out  where to write the output.
-     * @param mode how the output should be formatted.
-     * @throws NullPointerException If {@code out} or {@code outputMode}
-     *                              are {@code null}.
-     */
-    public void print(OutputStream out, OutputMode mode) {
-        Objects.requireNonNull(out, "out cannot be null");
-        Objects.requireNonNull(mode, "mode cannot be null");
-        switch (mode) {
-            case CSV:
-                printCsvResults(out);
-                break;
-            case HUMAN_READABLE:
-                printHumanReadableResults(out);
-                break;
-            default:
-                String msg = "Unexpected case, this is a bug";
-                throw new UnsupportedOperationException(msg);
-        }
     }
 
     private static String formatSse(double sse) {

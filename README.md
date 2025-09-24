@@ -50,7 +50,6 @@ java -jar clusteral.jar                                                    \
     1000              # I: maximum number of iterations                    \
     0.001             # T: convergence threshold                           \
     100               # R: number of runs                                  \
-    human-readable    # O: output mode                                     \
     random-selection  # M: K-means initialization method                   \
     min-max           # N: normalization type                              \
     calinski-harabasz # V: name of the cluster validator                   \

@@ -47,7 +47,6 @@ import io.whirvis.edu.clustering.kmeans.KMeansInitMethod;
  *  <li><i>I</i>: maximum number of iterations (<u>positive</u> integer)</li>
  *  <li><i>T</i>: convergence threshold (<u>non-negative</u> real)</li>
  *  <li><i>R</i>: number of runs (<u>positive</u> integer)</li>
- *  <li><i>O</i>: output mode (human readable or CSV)</li>
  *  <li><i>M</i>: K-means initialization method</li>
  *  <li><i>N</i>: normalization type</li>
  *  <li><i>V</i>: name of the cluster validator</li>
@@ -122,14 +121,6 @@ final class ClusteringParams {
                     throw new ParamException(msg);
                 }
             });
-
-    /**
-     * The parameter for &lt;O&gt;, as described in the document.
-     */
-    /* package-private */
-    static final EnumParam<OutputMode> OUTPUT_MODE =
-            new EnumParam<>("output mode",
-                    OutputMode.class, false);
 
     /**
      * The parameter for &lt;M&gt;, as described in the document.

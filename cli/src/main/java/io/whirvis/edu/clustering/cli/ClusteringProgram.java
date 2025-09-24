@@ -150,11 +150,12 @@ public final class ClusteringProgram {
                 " (" + args.numClusters + ") does not match" +
                 " the true cluster count of the file" +
                 " (" + pointFile.getTrueClusterCount() + ").");
-        err.println(); /* separator */
-
         Thread.sleep(3000);
+
         err.println("Continuing...");
         Thread.sleep(3000);
+
+        err.println(); /* separator */
     }
 
     public static void main(String[] javaArgs) throws Exception {

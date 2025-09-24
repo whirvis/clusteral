@@ -45,7 +45,7 @@ dataset file. The program expects each file to have a header line, and then
 subsequent lines for each data point. An example is listed below.
 
 ```txt
-250 7 5
+250 7 3
 0.63 0.47 0.48 0.51 0.82 0.84 0
 0.23 0.48 0.48 0.59 0.88 0.89 0
 0.34 0.49 0.48 0.58 0.85 0.80 0

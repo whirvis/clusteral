@@ -25,7 +25,13 @@ package io.whirvis.edu.clustering;
 
 import io.whirvis.edu.clustering.kmeans.KMeansInitMethod;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -38,6 +44,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 @SuppressWarnings("unused")
 public final class DataPointFile implements Iterable<DataPoint> {
+
+    private static final String REGEX_WHITESPACE = "\\s+";
+    private static final int POINT_COUNT_INDEX = 0;
+    private static final int DIMENSIONS_INDEX = 1;
+    private static final int TRUE_CLUSTER_COUNT_INDEX = 2;
 
     private final int pointCount;
     private final int dimensions;
@@ -78,12 +89,10 @@ public final class DataPointFile implements Iterable<DataPoint> {
         this.pointLock = new ReentrantReadWriteLock();
 
         /*
-         * This may look like a waste of memory, but it isn't. It is used
-         * by the getRandomClusters() method to quickly select both random
-         * and unique centroids.
-         *
-         * The re-entrant lock ensures thread safety, it prevents multiple
-         * threads from shuffling the indices list at the same time.
+         * This array is used by the getRandomClusters() method
+         * to quickly select both random and unique centroids. The
+         * re-entrant lock is also used to prevent multiple threads
+         * from shuffling the indices list at the same time.
          */
         this.indices = new ArrayList<>();
         this.indicesLock = new ReentrantLock();
@@ -117,13 +126,7 @@ public final class DataPointFile implements Iterable<DataPoint> {
         try {
             for (int i = 0; i < file.points.size(); i++) {
                 DataPoint point = file.points.get(i);
-                double[] axes = new double[point.getDimensions()];
-                for (int j = 0; j < axes.length; j++) {
-                    axes[j] = point.getAxis(j);
-                }
-                int trueClusterIndex = point.getTrueClusterIndex();
-                points.add(new DataPoint(this, i, axes,
-                        trueClusterIndex, pointLock));
+                points.add(copyPoint(this, pointLock, point, i));
             }
         } finally {
             file.pointLock.readLock().unlock();
@@ -351,7 +354,7 @@ public final class DataPointFile implements Iterable<DataPoint> {
         double expectedSize = pointCount * ((pointCount - 1.0f) / 2.0f);
         if (unorderedPointPairs.size() != Math.round(expectedSize)) {
             String msg = "Unexpected size for unordered pair list";
-            throw new RuntimeException(msg);
+            throw new ClusterException(msg);
         }
 
         return this.unorderedPointPairs;
@@ -472,7 +475,7 @@ public final class DataPointFile implements Iterable<DataPoint> {
             } catch (IndexOutOfBoundsException e) {
                 String msg = "The true cluster index " + index + " for point "
                         + " (" + point + ") does not exist in file";
-                throw new RuntimeException(msg, e);
+                throw new ClusterException(msg, e);
             }
         }
 
@@ -615,6 +618,8 @@ public final class DataPointFile implements Iterable<DataPoint> {
          * being, the point with the greatest value of: min(d(x,c1), d(x,c2),
          * ..., d(x, ci-1)).
          */
+        List<Double> distances = new ArrayList<>();
+        Map<Double, DataPoint> nearestCenterDistances = new HashMap<>();
         for (int i = 1; i < count; i++) {
             /*
              * Therefore, to get the next point, we must go through every
@@ -623,9 +628,7 @@ public final class DataPointFile implements Iterable<DataPoint> {
              * it to a map where the key is the distance and the value is
              * the data point.
              */
-            Map<Double, DataPoint> nearestCenterDistances = new HashMap<>();
             for (DataPoint point : points) {
-                List<Double> distances = new ArrayList<>();
                 for (PointCluster cluster : clusters) {
                     DataPoint centroid = cluster.getCentroid();
                     distances.add(centroid.squaredError(point));
@@ -644,6 +647,10 @@ public final class DataPointFile implements Iterable<DataPoint> {
             Double maxDistance = MinMax.getMax(nearestCenterDistances.keySet());
             DataPoint farthest = nearestCenterDistances.get(maxDistance);
             clusters.addCluster(farthest);
+
+            /* these must be empty for the next iteration */
+            distances.clear();
+            nearestCenterDistances.clear();
         }
 
         return clusters;
@@ -689,8 +696,8 @@ public final class DataPointFile implements Iterable<DataPoint> {
             case MAXIMIN:
                 return this.getMaximinClusters(count);
             default:
-                String msg = "This is a bug";
-                throw new RuntimeException(msg);
+                String msg = "Unexpected case, this is a bug";
+                throw new UnsupportedOperationException(msg);
         }
     }
 
@@ -848,8 +855,8 @@ public final class DataPointFile implements Iterable<DataPoint> {
                     this.normalizeWithZScore();
                     break; /* do not fall through */
                 default:
-                    String msg = "This is a bug";
-                    throw new RuntimeException(msg);
+                    String msg = "Unexpected case, this is a bug";
+                    throw new UnsupportedOperationException(msg);
             }
 
             this.normalized = true;
@@ -912,10 +919,49 @@ public final class DataPointFile implements Iterable<DataPoint> {
         }
     }
 
-    private static final String REGEX_WHITESPACE = "\\s+";
-    private static final int POINT_COUNT_INDEX = 0;
-    private static final int DIMENSIONS_INDEX = 1;
-    private static final int TRUE_CLUSTER_COUNT_INDEX = 2;
+    private static DataPoint copyPoint(
+            DataPointFile file,
+            ReadWriteLock pointLock,
+            DataPoint point,
+            int index) {
+        double[] axes = new double[point.getDimensions()];
+        for (int j = 0; j < axes.length; j++) {
+            axes[j] = point.getAxis(j);
+        }
+        int trueClusterIndex = point.getTrueClusterIndex();
+        return new DataPoint(file, index, axes,
+                trueClusterIndex, pointLock);
+    }
+
+    private static DataPoint loadPoint(
+            BufferedReader reader,
+            DataPointFile pointFile,
+            int index,
+            int dimensions,
+            boolean hasTrueClusters) throws IOException {
+        int columns = dimensions + (hasTrueClusters ? 1 : 0);
+        double[] data = readDoubles(reader, REGEX_WHITESPACE, columns);
+
+        /*
+         * Also, just to be safe, ensure that the true cluster index
+         * cast to an integer is the same as the value read from the
+         * file (the index is read as a double as it comes with all
+         * the other points, which should be doubles).
+         */
+        int trueClusterIndex = -1;
+        if (hasTrueClusters) {
+            trueClusterIndex = (int) data[columns - 1];
+            if (data[columns - 1] != trueClusterIndex) {
+                throw new IOException("Invalid true cluster index");
+            }
+        }
+
+        double[] axes = new double[dimensions];
+        System.arraycopy(data, 0, axes, 0, dimensions);
+
+        return new DataPoint(pointFile, index, axes,
+                trueClusterIndex, pointFile.pointLock);
+    }
 
     private static List<String> splitAndFilterOutEmptyStrings(
             String str, String regex) {
@@ -1105,30 +1151,9 @@ public final class DataPointFile implements Iterable<DataPoint> {
         int loadedPointCount = 0;
         try {
             for (int i = 0; i < pointCount; i++) {
-                int columns = dimensions + (hasTrueClusters ? 1 : 0);
-                double[] data = readDoubles(reader, REGEX_WHITESPACE, columns);
-
-                /*
-                 * Also, just to be safe, ensure that the true cluster index
-                 * cast to an integer is the same as the value read from the
-                 * file (the index is read as a double as it comes with all
-                 * the other points, which should be doubles).
-                 */
-                int trueClusterIndex = -1;
-                if (hasTrueClusters) {
-                    trueClusterIndex = (int) data[columns - 1];
-                    if (data[columns - 1] != trueClusterIndex) {
-                        throw new IOException("Invalid true cluster index");
-                    }
-                }
-
-                double[] axes = new double[dimensions];
-                System.arraycopy(data, 0, axes, 0, dimensions);
-
-                pointFile.points.add(new DataPoint(
-                        pointFile, i, axes, trueClusterIndex,
-                        pointFile.pointLock));
-
+                pointFile.points.add(loadPoint(
+                        reader, pointFile, i,
+                        dimensions, hasTrueClusters));
                 loadedPointCount += 1;
             }
         } catch (NumberFormatException e) {
@@ -1180,9 +1205,9 @@ public final class DataPointFile implements Iterable<DataPoint> {
     public static DataPointFile open(
             File file,
             boolean hasTrueClusters) throws IOException {
-        try (FileReader reader = new FileReader(file);
-             BufferedReader buffered = new BufferedReader(reader)) {
-            return openViaBufferedReader(buffered, hasTrueClusters);
+        Path path = Paths.get(file.toURI());
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            return openViaBufferedReader(reader, hasTrueClusters);
         }
     }
 

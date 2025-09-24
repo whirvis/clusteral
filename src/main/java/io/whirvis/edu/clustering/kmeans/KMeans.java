@@ -23,10 +23,7 @@
  */
 package io.whirvis.edu.clustering.kmeans;
 
-import io.whirvis.edu.clustering.DataPoint;
-import io.whirvis.edu.clustering.DataPointFile;
-import io.whirvis.edu.clustering.PointCluster;
-import io.whirvis.edu.clustering.PointClusters;
+import io.whirvis.edu.clustering.*;
 import io.whirvis.edu.clustering.cli.ClusteringArgs;
 
 import java.util.ArrayList;
@@ -106,8 +103,7 @@ public final class KMeans {
              * something has gone wrong and the program should stop.
              */
             if (iterationSse > previousSse) {
-                System.err.println("Error: SSE should never increase.");
-                System.exit(1); /* this is a serious issue */
+                throw new ClusterException("SSE should never increase");
             }
 
             /*

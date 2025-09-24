@@ -29,6 +29,8 @@ package io.whirvis.edu.clustering.cli.args;
 @SuppressWarnings("unused")
 public class ParamException extends RuntimeException {
 
+    private static final long serialVersionUID = -6746136059375934439L;
+
     private ProgramParam<?> culprit;
 
     /**

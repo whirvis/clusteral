@@ -29,6 +29,8 @@ package io.whirvis.edu.clustering;
 @SuppressWarnings("unused")
 public class ClusterException extends RuntimeException {
 
+    private static final long serialVersionUID = -8617864030120367715L;
+
     /**
      * Constructs a new {@code ClusterException} with the specified detail
      * message and cause.

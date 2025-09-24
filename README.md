@@ -8,8 +8,9 @@
 
 This is the semester long project for a graduate class in
 [cluster analysis](https://en.wikipedia.org/wiki/Cluster_analysis) at my
-university. The code remains unchanged since it's final submission, except
-for changes to protect my privacy.
+university. The code remains mostly unchanged since its final submission.
+However, some changes have been made to protect my privacy and improve the
+code quality.
 
 ℹ️ **Note: This project uses zero dependencies by design.**
 
@@ -36,6 +37,31 @@ chmod +x ./gradlew # unix only
 # install to local Maven repository if desired
 ./gradlew publishToMavenLocal
 ```
+
+## 📋 Dataset Format
+
+Before running the clustering program, you will need to have a compatible
+dataset file. The program expects each file to have a header line, and then
+subsequent lines for each data point. An example is listed below.
+
+```txt
+9 12 3
+18.93 1.75 1.32 15.96 11.65 1.07 14.11 14.67 6.53 1.11 1190 0
+19.36 2.01 1.48 15.71 13.57 1.39 16.76 14.12 0.08 4.96 1226 0
+10.12 1.42 6.33 10.54 16.73 2.16 17.19 13.42 1.85 4.89 1335 0
+18.65 2.65 3.24 12.54 17.55 2.92 14.79 15.47 1.78 3.50 1402 1
+11.12 1.70 9.84 13.35 17.36 0.49 18.13 15.32 3.71 7.15 1171 1
+12.88 3.83 6.32 17.67 14.14 0.75 12.94 14.88 4.54 3.54 1120 1
+15.00 1.26 3.52 16.37 18.89 1.05 12.93 11.90 1.70 1.97 1430 2
+16.04 3.51 7.55 12.82 12.83 1.97 18.35 18.53 6.16 5.38 1304 2
+14.47 2.75 2.72 11.96 12.89 1.54 12.41 19.54 0.08 4.10 1216 2
+```
+
+Note the contents of the first line. The first number is how many data
+points there are, the second number is how many dimensions each point has,
+and the third number is the number of true clusters. **Keep in mind that
+the true cluster is also one of the axes.** It is always the last axis of
+each point.
 
 ## 📊 Running the Clustering Program
 

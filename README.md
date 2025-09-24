@@ -39,13 +39,25 @@ chmod +x ./gradlew # unix only
 
 ## 📊 Running the Clustering Program
 
-There is a main method in `ClusterProgram`.
+There is a main method in `ClusteringProgram`. It should be executable out of
+the box, so long as valid arguments are given. The parameters are documented
+in `ClusteringParams`. An example of valid CLI arguments would be:
 
-Before you can run it, you will need to assign non-null values to
-`outputMode`, `normalizationType`, `initMethod`, and `validator`
-(project documents required that they be hardcoded and not specified
-via the command line). After that, it should run out of the box when
-given valid arguments via the command line. The program's parameters
-are described in `ClusterParams`.
+```bash
+java -jar clusteral.jar                                                    \
+    dataset.txt       # F: name of the data file                           \
+    3                 # K: number of clusters                              \
+    1000              # I: maximum number of iterations                    \
+    0.001             # T: convergence threshold                           \
+    100               # R: number of runs                                  \
+    human-readable    # O: output mode                                     \
+    random-selection  # M: K-means initialization method                   \
+    min-max           # N: normalization type                              \
+    calinski-harabasz # V: name of the cluster validator                   \
+    average           # D: diameter calculation method                     \
+    single-linkage    # L: linkage method, if necessary         (optional) \
+    true              # C: random centroids on multiple nearest (optional) \
+    stdout            # W: where to write program output        (optional)
+```
 
 Both classes are in the `io.whirvis.edu.clustering.cli` package.

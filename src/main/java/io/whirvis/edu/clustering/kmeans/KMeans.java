@@ -27,7 +27,7 @@ import io.whirvis.edu.clustering.DataPoint;
 import io.whirvis.edu.clustering.DataPointFile;
 import io.whirvis.edu.clustering.PointCluster;
 import io.whirvis.edu.clustering.PointClusters;
-import io.whirvis.edu.clustering.cli.ClusterProgramArgs;
+import io.whirvis.edu.clustering.cli.ClusteringArgs;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -213,7 +213,6 @@ public final class KMeans {
      * arguments.
      *
      * @param pointFile the point file to read from.
-     * @param method    the initialization method to use.
      * @param args      the program arguments.
      * @return the results of each run.
      * @throws NullPointerException if {@code pointFile}, {@code method},
@@ -221,10 +220,9 @@ public final class KMeans {
      */
     public static KMeansRuns perform(
             DataPointFile pointFile,
-            KMeansInitMethod method,
-            ClusterProgramArgs args) {
+            ClusteringArgs args) {
         Objects.requireNonNull(args, "args cannot be null");
-        return performRuns(pointFile, method,
+        return performRuns(pointFile, args.initMethod,
                 args.numClusters, args.maxIterations,
                 args.convergenceThreshold, args.numRuns,
                 args.chooseRandomCentroidOnMultipleNearest);

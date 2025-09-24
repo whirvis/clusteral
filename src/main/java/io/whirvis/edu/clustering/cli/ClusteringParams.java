@@ -23,7 +23,11 @@
  */
 package io.whirvis.edu.clustering.cli;
 
+import io.whirvis.edu.clustering.DiameterMethod;
+import io.whirvis.edu.clustering.LinkageMethod;
+import io.whirvis.edu.clustering.NormalizationType;
 import io.whirvis.edu.clustering.cli.args.*;
+import io.whirvis.edu.clustering.kmeans.KMeansInitMethod;
 
 /**
  * Parameters used by the clustering program.
@@ -34,7 +38,8 @@ import io.whirvis.edu.clustering.cli.args.*;
  * <b>Input:</b> Your program should be <u>non-interactive</u> (that is, the
  * program should <u>not</u> interact with the user by asking them explicit
  * questions) and take the following <u>command-line</u> arguments: &lt;F&gt;
- * &lt;K&gt; &lt;I&gt; &lt;T&gt; &lt;R&gt;, where
+ * &lt;K&gt; &lt;I&gt; &lt;T&gt; &lt;R&gt;, &lt;O&gt;, &lt;M&gt;, &lt;N&gt;,
+ * &lt;D&gt;, &lt;W&gt;, where
  * <p>
  * <ul>
  *  <li><i>F</i>: name of the data file</li>
@@ -42,16 +47,26 @@ import io.whirvis.edu.clustering.cli.args.*;
  *  <li><i>I</i>: maximum number of iterations (<u>positive</u> integer)</li>
  *  <li><i>T</i>: convergence threshold (<u>non-negative</u> real)</li>
  *  <li><i>R</i>: number of runs (<u>positive</u> integer)</li>
+ *  <li><i>O</i>: output mode (human readable or CSV)</li>
+ *  <li><i>M</i>: K-means initialization method</li>
+ *  <li><i>N</i>: normalization type</li>
+ *  <li><i>V</i>: name of the cluster validator</li>
+ *  <li><i>D</i>: diameter calculation method</li>
+ *  <li><i>L</i>: linkage method, if necessary (optional)</li>
+ *  <li><i>C</i>: random centroid on multiple nearest (optional)</li>
+ *  <li><i>W</i>: where to write program output (optional)</li>
  * </ul>
  *
- * @see ClusterProgram
+ * @see ClusteringArgs
+ * @see ClusteringProgram
  */
 /* package-private */
-final class ClusterParams {
+final class ClusteringParams {
 
-    private ClusterParams() {
-        /* utility class */
-    }
+    private static final int MIN_NUM_CLUSTERS = 1;
+    private static final int MIN_MAX_ITERATIONS = 1;
+    private static final double MIN_CONVERGENCE_THRESHOLD = 0.0d;
+    private static final int MIN_NUM_RUNS = 1;
 
     /**
      * The parameter for &lt;F&gt;, as described in the document.
@@ -66,7 +81,7 @@ final class ClusterParams {
     /* package-private */
     static final IntParam NUM_CLUSTERS =
             new IntParam("number of clusters", i -> {
-                if (i < 1) {
+                if (i < MIN_NUM_CLUSTERS) {
                     String msg = "Number of clusters must be greater than one";
                     throw new ParamException(msg);
                 }
@@ -78,12 +93,11 @@ final class ClusterParams {
     /* package-private */
     static final IntParam MAX_ITERATIONS =
             new IntParam("max iterations", i -> {
-                if (i <= 0) {
+                if (i < MIN_MAX_ITERATIONS) {
                     String msg = "Max iterations must be positive";
                     throw new ParamException(msg);
                 }
             });
-
 
     /**
      * The parameter for &lt;T&gt;, as described in the document.
@@ -91,7 +105,7 @@ final class ClusterParams {
     /* package-private */
     static final DoubleParam CONVERGENCE_THRESHOLD =
             new DoubleParam("convergence threshold", d -> {
-                if (d < 0) {
+                if (d < MIN_CONVERGENCE_THRESHOLD) {
                     String msg = "Convergence threshold must be non-negative";
                     throw new ParamException(msg);
                 }
@@ -103,13 +117,62 @@ final class ClusterParams {
     /* package-private */
     static final IntParam NUM_RUNS =
             new IntParam("number of runs", i -> {
-                if (i <= 0) {
+                if (i < MIN_NUM_RUNS) {
                     String msg = "Number of runs must be positive";
                     throw new ParamException(msg);
                 }
             });
 
     /**
+     * The parameter for &lt;O&gt;, as described in the document.
+     */
+    /* package-private */
+    static final EnumParam<OutputMode> OUTPUT_MODE =
+            new EnumParam<>("output mode",
+                    OutputMode.class, false);
+
+    /**
+     * The parameter for &lt;M&gt;, as described in the document.
+     */
+    /* package-private */
+    static final EnumParam<KMeansInitMethod> K_MEANS_INIT_METHOD =
+            new EnumParam<>("k-means initialization method",
+                    KMeansInitMethod.class, false);
+
+    /**
+     * The parameter for &lt;N&gt;, as described in the document.
+     */
+    /* package-private */
+    static final EnumParam<NormalizationType> NORMALIZATION_TYPE =
+            new EnumParam<>("normalization type",
+                    NormalizationType.class, false);
+
+    /**
+     * The parameter for &lt;V&gt;, as described in the document.
+     */
+    /* package-private */
+    static final ClusterValidatorParam VALIDATOR_FORMULA =
+            new ClusterValidatorParam("cluster validator");
+
+    /**
+     * The parameter for &lt;D&gt;, as described in the document.
+     */
+    /* package-private */
+    static final EnumParam<DiameterMethod> DIAMETER_METHOD =
+            new EnumParam<>("diameter calculation method",
+                    DiameterMethod.class, false);
+
+    /**
+     * The parameter for &lt;L&gt;, as described in the document.
+     */
+    /* package-private */
+    static final EnumParam<LinkageMethod> LINKAGE_METHOD =
+            new EnumParam<>("linkage method",
+                    LinkageMethod.class, true);
+
+    /**
+     * The parameter for &lt;L&gt;, as described in the document.
+     * <p>
      * An extra parameter described as a requirement for graduate students
      * in Phase 2:
      * <blockquote>
@@ -126,5 +189,16 @@ final class ClusterParams {
     /* package-private */
     static final BooleanParam CHOOSE_RANDOM_CENTROID_ON_MULTIPLE_NEAREST =
             new BooleanParam("choose random centroid on multiple nearest");
+
+    /**
+     * The parameter for &lt;W&gt;, as described in the document.
+     */
+    /* package-private */
+    static final StringParam OUTPUT_DESTINATION =
+            new StringParam("output destination");
+
+    private ClusteringParams() {
+        /* utility class */
+    }
 
 }

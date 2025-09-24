@@ -24,7 +24,6 @@
 package io.whirvis.edu.clustering.kmeans;
 
 import io.whirvis.edu.clustering.*;
-import io.whirvis.edu.clustering.cli.ClusteringArgs;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -38,8 +37,36 @@ import java.util.Objects;
 @SuppressWarnings("unused")
 public final class KMeans {
 
-    private KMeans() {
-        /* utility class */
+    /**
+     * Creates a cluster group with the given initialization method.
+     *
+     * @param method the initialization method to use.
+     * @param count  the amount of pointer clusters to create.
+     * @return the newly created point clusters group.
+     * @throws NullPointerException     if {@code pointFile} or
+     *                                  {@code method} are {@code null}.
+     * @throws IllegalArgumentException if {@code count} is not positive;
+     *                                  if {@code count} is greater than
+     *                                  the point count of this file.
+     */
+    public static PointClusters getClusters(
+            DataPointFile pointFile, KMeansInitMethod method, int count) {
+        Objects.requireNonNull(pointFile, "pointFile cannot be null");
+        Objects.requireNonNull(method, "method cannot be null");
+
+        pointFile.validateClusterCount(count);
+
+        switch (method) {
+            case RANDOM_SELECTION:
+                return pointFile.getRandomSelectionClusters(count);
+            case RANDOM_PARTITION:
+                return pointFile.getRandomPartitionClusters(count);
+            case MAXIMIN:
+                return pointFile.getMaximinClusters(count);
+            default:
+                String msg = "Unexpected case, this is a bug";
+                throw new UnsupportedOperationException(msg);
+        }
     }
 
     /* note: rcomn = random centroid on multiple nearest */
@@ -59,7 +86,7 @@ public final class KMeans {
             throw new IllegalArgumentException(msg);
         }
 
-        PointClusters clusters = pointFile.getClusters(method, numClusters);
+        PointClusters clusters = getClusters(pointFile, method, numClusters);
 
         double initialSse = 0;
         int numIterations = 0;
@@ -204,24 +231,8 @@ public final class KMeans {
         return new KMeansRuns(runs);
     }
 
-    /**
-     * Performs runs of the K-means algorithm based on the given program
-     * arguments.
-     *
-     * @param pointFile the point file to read from.
-     * @param args      the program arguments.
-     * @return the results of each run.
-     * @throws NullPointerException if {@code pointFile}, {@code method},
-     *                              or {@code args} are {@code null}.
-     */
-    public static KMeansRuns perform(
-            DataPointFile pointFile,
-            ClusteringArgs args) {
-        Objects.requireNonNull(args, "args cannot be null");
-        return performRuns(pointFile, args.initMethod,
-                args.numClusters, args.maxIterations,
-                args.convergenceThreshold, args.numRuns,
-                args.chooseRandomCentroidOnMultipleNearest);
+    private KMeans() {
+        /* utility class */
     }
 
 }

@@ -23,8 +23,6 @@
  */
 package io.whirvis.edu.clustering;
 
-import io.whirvis.edu.clustering.kmeans.KMeansInitMethod;
-
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.File;
@@ -436,7 +434,7 @@ public final class DataPointFile implements Iterable<DataPoint> {
      *                                  if {@code count} is greater than
      *                                  the point count of this file.
      */
-    private void validateClusterCount(int count) {
+    public void validateClusterCount(int count) {
         if (count <= 0) {
             String msg = "count must be positive";
             throw new IllegalArgumentException(msg);
@@ -498,7 +496,6 @@ public final class DataPointFile implements Iterable<DataPoint> {
      *                                  if {@code count} is greater than
      *                                  the point count of this file.
      * @see #getClusters(int...)
-     * @see #getClusters(KMeansInitMethod, int)
      */
     public PointClusters getRandomSelectionClusters(int count) {
         this.validateClusterCount(count);
@@ -555,7 +552,6 @@ public final class DataPointFile implements Iterable<DataPoint> {
      * @throws IllegalArgumentException if {@code count} is not positive;
      *                                  if {@code count} is greater than
      *                                  the point count of this file.
-     * @see #getClusters(KMeansInitMethod, int)
      */
     public PointClusters getRandomPartitionClusters(int count) {
         this.validateClusterCount(count);
@@ -595,7 +591,6 @@ public final class DataPointFile implements Iterable<DataPoint> {
      * @throws IllegalArgumentException  if {@code count} is not positive;
      *                                   if {@code count} is greater than
      *                                   the point count of this file.
-     * @see #getClusters(KMeansInitMethod, int)
      */
     public PointClusters getMaximinClusters(int initialIndex, int count) {
         this.validateClusterCount(count);
@@ -671,35 +666,10 @@ public final class DataPointFile implements Iterable<DataPoint> {
      * @throws IllegalArgumentException if {@code count} is not positive;
      *                                  if {@code count} is greater than
      *                                  the point count of this file.
-     * @see #getClusters(KMeansInitMethod, int)
      */
     public PointClusters getMaximinClusters(int count) {
         int middleIndex = (points.size() - 1) / 2;
         return this.getMaximinClusters(middleIndex, count);
-    }
-
-    /**
-     * Creates a cluster group with the given initialization method.
-     *
-     * @param method the initialization method to use.
-     * @param count  the amount of pointer clusters to create.
-     * @return the newly created point clusters group.
-     * @throws IllegalArgumentException if {@code count} is not positive;
-     *                                  if {@code count} is greater than
-     *                                  the point count of this file.
-     */
-    public PointClusters getClusters(KMeansInitMethod method, int count) {
-        switch (method) {
-            case RANDOM_SELECTION:
-                return this.getRandomSelectionClusters(count);
-            case RANDOM_PARTITION:
-                return this.getRandomPartitionClusters(count);
-            case MAXIMIN:
-                return this.getMaximinClusters(count);
-            default:
-                String msg = "Unexpected case, this is a bug";
-                throw new UnsupportedOperationException(msg);
-        }
     }
 
     /**

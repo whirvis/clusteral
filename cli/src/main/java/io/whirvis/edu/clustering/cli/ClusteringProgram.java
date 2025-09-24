@@ -183,11 +183,15 @@ public final class ClusteringProgram {
 
         warnOnClusterCountMismatch(stderr, pointFile, args);
 
-        KMeansRuns runs = KMeans.perform(pointFile, args);
+        KMeansRuns runs = KMeans.performRuns(pointFile,
+                args.initMethod, args.numClusters, args.maxIterations,
+                args.convergenceThreshold, args.numRuns,
+                args.chooseRandomCentroidOnMultipleNearest);
+
         ClusteringResults results = new ClusteringResults(pointFile,
                 args.normalizationType, validator, runs, args.initMethod);
-        results.print(out);
 
+        results.print(out);
         if (out != stdout && out != stderr) {
             out.close();
         }

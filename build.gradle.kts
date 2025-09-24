@@ -9,3 +9,7 @@ java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
+
+subprojects {
+    apply(plugin = "java")
+}

@@ -23,6 +23,8 @@
  */
 package io.whirvis.edu.clustering;
 
+import io.whirvis.edu.clustering.util.StrUtils;
+
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.*;

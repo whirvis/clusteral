@@ -23,6 +23,8 @@
  */
 package io.whirvis.edu.clustering;
 
+import io.whirvis.edu.clustering.util.StrUtils;
+
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.File;

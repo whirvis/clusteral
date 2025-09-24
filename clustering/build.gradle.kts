@@ -1,1 +1,3 @@
-/* intentionally empty */
+dependencies {
+    implementation(project(":util"))
+}

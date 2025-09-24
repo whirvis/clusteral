@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.whirvis.edu.clustering;
+package io.whirvis.edu.clustering.util;
 
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -30,8 +30,7 @@ import java.util.StringJoiner;
  * Utility methods for converting {@code Object} instances to
  * {@code String}.
  */
-/* package-private */
-final class StrUtils {
+public final class StrUtils {
 
     private StrUtils() {
         /* utility class */

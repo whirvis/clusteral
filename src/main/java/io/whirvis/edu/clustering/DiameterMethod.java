@@ -31,17 +31,18 @@ package io.whirvis.edu.clustering;
 public enum DiameterMethod {
 
     /**
-     * TODO: docs
+     * Use the farthest distance between two points in a cluster.
      */
     COMPLETE("Complete"),
 
     /**
-     * TODO: docs
+     * use the average distance between all points in a cluster.
      */
     AVERAGE("Average"),
 
     /**
-     * TODO: docs
+     * Use the average distance of all points from the cluster's
+     * centroid multiplied by two.
      */
     CENTROID("Centroid");
 

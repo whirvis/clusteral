@@ -51,7 +51,7 @@ public abstract class ProgramParam<T> {
      *                    an argument meets certain criteria.
      * @throws NullPointerException if {@code displayName} is {@code null}.
      */
-    public ProgramParam(
+    protected ProgramParam(
             String displayName,
             Consumer<T> validator) {
         this.displayName = Objects.requireNonNull(displayName,

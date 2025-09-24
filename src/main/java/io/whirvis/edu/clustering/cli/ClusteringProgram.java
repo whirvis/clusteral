@@ -30,6 +30,7 @@ import io.whirvis.edu.clustering.validator.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -42,30 +43,34 @@ import java.util.Locale;
 public final class ClusteringProgram {
 
     /* package-private */
-    static void printFancyStackTrace(Throwable throwable) {
-        System.err.println("- [ STACK TRACE ] ----------------------");
-        throwable.printStackTrace(System.err);
-        System.err.println("----------------------------------------");
+    static void printFancyStackTrace(
+            PrintStream err,
+            Throwable throwable) {
+        err.println("- [ STACK TRACE ] ----------------------");
+        throwable.printStackTrace(err);
+        err.println("----------------------------------------");
     }
 
     private static DataPointFile loadPointFile(
+            PrintStream err,
             ClusteringArgs args) {
         DataPointFile pointFile;
         try {
             pointFile = DataPointFile.open(args.dataInputFile, true);
             pointFile.normalize(args.normalizationType);
         } catch (IOException e) {
-            printFancyStackTrace(e);
-            System.err.println("Error: Failed to load data point file.");
+            printFancyStackTrace(err, e);
+            err.println("Error: Failed to load data point file.");
             return null;
         }
         return pointFile;
     }
 
     private static DunnIndexCalculator getDunnIndexCalculator(
+            PrintStream err,
             ClusteringArgs args) {
         if (args.linkageMethod == null) {
-            System.err.println("Error: Linkage method must be defined"
+            err.println("Error: Linkage method must be defined"
                     + " when using Dunn-Index");
             return null;
         }
@@ -73,6 +78,7 @@ public final class ClusteringProgram {
     }
 
     private static ClusterValidator getClusterValidator(
+            PrintStream err,
             ClusteringArgs args) {
         switch (args.validatorFormula) {
             case CALINSKI_HARABASZ:
@@ -80,7 +86,7 @@ public final class ClusteringProgram {
             case DAVIES_BOULDIN:
                 return new DaviesBouldinCalculator();
             case DUNN_INDEX:
-                return getDunnIndexCalculator(args);
+                return getDunnIndexCalculator(err, args);
             case FOWLKES_MALLOWS:
                 return new FowlkesMallowsCalculator();
             case JACCARD_COEFFICIENT:
@@ -96,37 +102,42 @@ public final class ClusteringProgram {
     }
 
     private static OutputStream getOutputDestination(
+            PrintStream stdout,
+            PrintStream stderr,
             ClusteringArgs args) {
         String name = args.outputDestination;
         if (name == null) {
-            return System.out; /* default to console */
+            return stdout; /* default to standard out */
         }
 
         String lowercase = name.toLowerCase(Locale.ROOT);
         switch (lowercase) {
             case "0":
             case "stdout":
-                return System.out;
+                return stdout;
             case "1":
             case "stderr":
-                return System.err;
+                return stderr;
             case "2":
             case "stdin":
-                System.err.println("Error: Cannot write program output"
-                        + " to input stream");
+                stderr.println("Error: Cannot write" +
+                        " program output to input stream");
                 return null;
+            default:
+                break; /* fallthrough */
         }
 
         try {
             return Files.newOutputStream(Paths.get(name));
         } catch (IOException e) {
-            printFancyStackTrace(e);
-            System.err.println("Error: Failed to open output file.");
+            printFancyStackTrace(stderr, e);
+            stderr.println("Error: Failed to open output file.");
             return null;
         }
     }
 
     private static void warnOnClusterCountMismatch(
+            PrintStream err,
             DataPointFile pointFile,
             ClusteringArgs args) throws InterruptedException {
         if (!pointFile.areTrueClustersKnown()) {
@@ -135,46 +146,46 @@ public final class ClusteringProgram {
             return; /* data consistent, no warning necessary */
         }
 
-        System.out.println("Notice: Supplied cluster count" +
+        err.println("Notice: Supplied cluster count" +
                 " (" + args.numClusters + ") does not match" +
                 " the true cluster count of the file" +
                 " (" + pointFile.getTrueClusterCount() + ").");
-        System.out.println(); /* separator */
+        err.println(); /* separator */
 
         Thread.sleep(3000);
-        System.out.println("Continuing...");
+        err.println("Continuing...");
         Thread.sleep(3000);
     }
 
     public static void main(String[] javaArgs) throws Exception {
-        ClusteringArgs args = ClusteringArgs.get(javaArgs);
+        PrintStream stdout = System.out;
+        PrintStream stderr = System.err;
+
+        ClusteringArgs args = ClusteringArgs.get(stderr, javaArgs);
         if (args == null) {
             return; /* argument parsing failed */
         }
 
-        DataPointFile pointFile = loadPointFile(args);
+        DataPointFile pointFile = loadPointFile(stderr, args);
         if (pointFile == null) {
             return; /* file loading failed */
         }
 
-        ClusterValidator validator = getClusterValidator(args);
+        ClusterValidator validator = getClusterValidator(stderr, args);
         if (validator == null) {
             return; /* validator instantiation failed */
         }
 
-        OutputStream out = getOutputDestination(args);
+        OutputStream out = getOutputDestination(stdout, stderr, args);
         if (out == null) {
             return; /* failed to get output destination */
         }
 
-        warnOnClusterCountMismatch(pointFile, args);
+        warnOnClusterCountMismatch(stderr, pointFile, args);
 
         KMeansRuns runs = KMeans.perform(pointFile, args);
-
-        ClusteringResults results = new ClusteringResults(
-                pointFile, args.normalizationType,
-                validator, runs, args.initMethod);
-
+        ClusteringResults results = new ClusteringResults(pointFile,
+                args.normalizationType, validator, runs, args.initMethod);
         results.print(out, args.outputMode);
     }
 

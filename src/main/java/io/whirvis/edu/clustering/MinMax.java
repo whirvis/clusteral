@@ -145,9 +145,11 @@ public final class MinMax {
             String msg = "Cannot find min or max with no elements";
             throw new IllegalArgumentException(msg);
         }
-        T first = elemsI.next();
 
-        T lowest = first, highest = first;
+        T first = elemsI.next();
+        T lowest = first;
+        T highest = first;
+
         while (elemsI.hasNext()) {
             T current = elemsI.next();
             if (current.compareTo(lowest) < 0) {
@@ -156,6 +158,7 @@ public final class MinMax {
                 highest = current;
             }
         }
+
         return new MinMaxPair<>(lowest, highest);
     }
 

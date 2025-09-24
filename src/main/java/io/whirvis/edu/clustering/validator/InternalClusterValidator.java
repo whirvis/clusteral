@@ -41,7 +41,7 @@ public abstract class InternalClusterValidator
      * @throws NullPointerException if {@code name} or  {@code abbreviation}
      *                              are {@code null}.
      */
-    public InternalClusterValidator(
+    protected InternalClusterValidator(
             String name, String abbreviation) {
         super(ClusterValidatorType.INTERNAL, name, abbreviation);
     }

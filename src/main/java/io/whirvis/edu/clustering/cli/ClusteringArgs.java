@@ -31,12 +31,13 @@ import io.whirvis.edu.clustering.cli.args.ProgramArgs;
 import io.whirvis.edu.clustering.kmeans.KMeansInitMethod;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.Objects;
 
 /**
  * Container for the arguments of {@link ClusteringProgram}.
  *
- * @see #get(String[])
+ * @see #get(PrintStream, String[])
  * @see ClusteringParams
  */
 public final class ClusteringArgs {
@@ -149,10 +150,16 @@ public final class ClusteringArgs {
      * If parsing fails, an error message will be printed to the console and
      * a value of {@code null} will be returned.
      *
+     * @param err      where to send error messages to.
      * @param javaArgs the arguments to parse.
      * @return the parsed arguments, {@code null} if parsing failed.
+     * @throws NullPointerException if {@code err} or {@code javaArgs}
+     *                              are {@code null}.
      */
-    public static ClusteringArgs get(String[] javaArgs) {
+    public static ClusteringArgs get(
+            PrintStream err,
+            String[] javaArgs) {
+        Objects.requireNonNull(err, "err cannot be null");
         Objects.requireNonNull(javaArgs, "javaArgs cannot be null");
 
         ProgramArgs args = new ProgramArgs();
@@ -168,7 +175,7 @@ public final class ClusteringArgs {
         args.add(9, ClusteringParams.DIAMETER_METHOD);
 
         if (javaArgs.length < args.getParamCount()) {
-            System.err.println("Usage: " + args.getUsage());
+            err.println("Usage: " + args.getUsage());
             return null; /* not enough arguments to parse */
         }
 
@@ -192,10 +199,10 @@ public final class ClusteringArgs {
         } catch (ParamException e) {
             Throwable cause = e.getCause();
             if (cause != null) {
-                ClusteringProgram.printFancyStackTrace(cause);
+                ClusteringProgram.printFancyStackTrace(err, cause);
             }
-            System.err.println("Error: " + e.getMessage());
-            System.err.println("Parameter: " + e.getCulpritStr());
+            err.println("Error: " + e.getMessage());
+            err.println("Parameter: " + e.getCulpritStr());
             return null; /* failed to parse arguments */
         }
 

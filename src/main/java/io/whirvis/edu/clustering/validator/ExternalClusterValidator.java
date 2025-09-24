@@ -41,7 +41,7 @@ public abstract class ExternalClusterValidator
      * @throws NullPointerException if {@code name} or  {@code abbreviation}
      *                              are {@code null}.
      */
-    public ExternalClusterValidator(
+    protected ExternalClusterValidator(
             String name, String abbreviation) {
         super(ClusterValidatorType.EXTERNAL, name, abbreviation);
     }

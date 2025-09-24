@@ -31,7 +31,7 @@ public class ParamException extends RuntimeException {
 
     private static final long serialVersionUID = -6746136059375934439L;
 
-    private ProgramParam<?> culprit;
+    private transient ProgramParam<?> culprit;
 
     /**
      * Constructs a new {@code ParamException} with the specified detail

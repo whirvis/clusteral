@@ -38,6 +38,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @SuppressWarnings("unused")
 public final class PointClusters implements Iterable<PointCluster> {
 
+    private static final Random RANDOM = new Random();
+
     private final DataPointFile file;
     private final List<PointCluster> clusters;
     private final Map<DataPoint, PointCluster> owners;
@@ -464,10 +466,9 @@ public final class PointClusters implements Iterable<PointCluster> {
         }
 
         if (randomOnMultiple) {
-            Random random = new Random();
             List<PointCluster> nearestClusters =
                     this.findMultipleNearestClusters(point, lowestError);
-            int chosenIndex = random.nextInt(nearestClusters.size());
+            int chosenIndex = RANDOM.nextInt(nearestClusters.size());
             nearestCluster = nearestClusters.get(chosenIndex);
         }
 

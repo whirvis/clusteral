@@ -45,6 +45,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @SuppressWarnings("unused")
 public final class DataPointFile implements Iterable<DataPoint> {
 
+    private static final Random RANDOM = new Random();
+
     private static final String REGEX_WHITESPACE = "\\s+";
     private static final int POINT_COUNT_INDEX = 0;
     private static final int DIMENSIONS_INDEX = 1;
@@ -350,8 +352,8 @@ public final class DataPointFile implements Iterable<DataPoint> {
         }
 
         /* sanity check for unordered pair generation */
-        double pointCount = points.size(); /* we must use doubles here */
-        double expectedSize = pointCount * ((pointCount - 1.0f) / 2.0f);
+        double pcd = points.size(); /* we must use doubles here */
+        double expectedSize = pcd * ((pcd - 1.0f) / 2.0f);
         if (unorderedPointPairs.size() != Math.round(expectedSize)) {
             String msg = "Unexpected size for unordered pair list";
             throw new ClusterException(msg);
@@ -563,9 +565,8 @@ public final class DataPointFile implements Iterable<DataPoint> {
             group.addCluster();
         }
 
-        Random random = new Random();
         for (DataPoint point : points) {
-            int clusterIndex = random.nextInt(count);
+            int clusterIndex = RANDOM.nextInt(count);
             PointCluster cluster = group.getCluster(clusterIndex);
             cluster.addPoint(point);
         }
@@ -809,8 +810,8 @@ public final class DataPointFile implements Iterable<DataPoint> {
             MinMaxPair<?> pair = this.getAxisMinAndMax(i);
             for (DataPoint point : points) {
                 double value = point.getAxis(i);
-                double normalized = pair.normalize(value);
-                point.setAxis(i, normalized);
+                double nv = pair.normalize(value);
+                point.setAxis(i, nv);
             }
         }
     }
@@ -820,8 +821,8 @@ public final class DataPointFile implements Iterable<DataPoint> {
             ZScoreNormalizer normalizer = this.getAxisZScoreNormalizer(i);
             for (DataPoint point : points) {
                 double value = point.getAxis(i);
-                double normalized = normalizer.normalize(value);
-                point.setAxis(i, normalized);
+                double nv = normalizer.normalize(value);
+                point.setAxis(i, nv);
             }
         }
     }

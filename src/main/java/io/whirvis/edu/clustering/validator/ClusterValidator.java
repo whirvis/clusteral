@@ -46,7 +46,7 @@ public abstract class ClusterValidator {
      * @throws NullPointerException if {@code type}, {@code name} or
      *                              {@code abbreviation} are {@code null}.
      */
-    public ClusterValidator(
+    protected ClusterValidator(
             ClusterValidatorType type,
             String name,
             String abbreviation) {

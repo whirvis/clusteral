@@ -187,6 +187,10 @@ public final class ClusteringProgram {
         ClusteringResults results = new ClusteringResults(pointFile,
                 args.normalizationType, validator, runs, args.initMethod);
         results.print(out, args.outputMode);
+
+        if (out != stdout && out != stderr) {
+            out.close();
+        }
     }
 
     private ClusteringProgram() {

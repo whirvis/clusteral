@@ -29,7 +29,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -48,6 +50,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @SuppressWarnings("unused")
 public final class DataPoint
         implements Iterable<Double>, Comparable<DataPoint> {
+
+    private static final Lock POINT_FORMAT_LOCK = new ReentrantLock();
+    private static final DecimalFormat POINT_FORMAT = new DecimalFormat(
+            "#.#", DecimalFormatSymbols.getInstance(Locale.US));
 
     private final DataPointFile file;
     private final int index;
@@ -418,7 +424,7 @@ public final class DataPoint
         try {
             StringBuilder pointsLine = new StringBuilder();
             for (int i = 0; i < axes.length; i++) {
-                pointsLine.append(POINT_FORMAT.format(axes[i]));
+                pointsLine.append(formatPoint(axes[i]));
                 pointsLine.append(i + 1 < axes.length ? " " : "");
             }
             if (this.isTrueClusterKnown()) {
@@ -431,8 +437,14 @@ public final class DataPoint
         }
     }
 
-    private static final DecimalFormat POINT_FORMAT = new DecimalFormat(
-            "#.#", DecimalFormatSymbols.getInstance(Locale.US));
+    private static String formatPoint(double number) {
+        POINT_FORMAT_LOCK.lock();
+        try {
+            return POINT_FORMAT.format(number);
+        } finally {
+            POINT_FORMAT_LOCK.unlock();
+        }
+    }
 
     /**
      * Returns the nearest point to a given point.

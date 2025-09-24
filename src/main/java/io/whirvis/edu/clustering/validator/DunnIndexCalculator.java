@@ -74,7 +74,7 @@ public final class DunnIndexCalculator extends InternalClusterValidator {
      */
     public DunnIndexCalculator(
             LinkageMethod linkage, DiameterMethod diameter) {
-        super("Dunn Index", "DI");
+        super("Dunn index", "DI");
         this.linkage = Objects.requireNonNull(linkage,
                 "linkage cannot be null");
         this.diameter = Objects.requireNonNull(diameter,

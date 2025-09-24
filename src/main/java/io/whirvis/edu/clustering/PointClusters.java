@@ -46,7 +46,7 @@ public final class PointClusters implements Iterable<PointCluster> {
     private final ReadWriteLock clusterLock;
 
     /**
-     * Constructs a new {@code PointClusterGroup}.
+     * Constructs a new {@code PointClusters}.
      * <p>
      * <b>Accessibility:</b> This constructor should only be called by
      * {@link DataPointFile}.

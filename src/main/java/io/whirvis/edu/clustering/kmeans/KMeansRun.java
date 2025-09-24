@@ -65,7 +65,7 @@ public final class KMeansRun {
     public final PointClusters clusters;
 
     /**
-     * Constructs a new {@code ClusterRunResult}.
+     * Constructs a new {@code KMeansRun}.
      *
      * @param runNum        the run number, starting from zero.
      * @param iterations    the SSEs for each iteration.

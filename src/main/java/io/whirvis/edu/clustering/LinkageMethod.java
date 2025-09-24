@@ -31,27 +31,28 @@ package io.whirvis.edu.clustering;
 public enum LinkageMethod {
 
     /**
-     * TODO: docs
+     * Use the nearest distance of two points from two clusters.
      */
     SINGLE_LINKAGE("Single linkage"),
 
     /**
-     * TODO: docs
+     * Use the farthest distance of two points from two clusters.
      */
     COMPLETE_LINKAGE("Complete linkage"),
 
     /**
-     * TODO: docs
+     * Use the average distance of every point from two clusters.
      */
     AVERAGE_LINKAGE("Average linkage"),
 
     /**
-     * TODO: docs
+     * Use the distance between the centroids of two clusters.
      */
     CENTROID_LINKAGE("Centroid linkage"),
 
     /**
-     * TODO: docs
+     * Use the average distance of every point from two clusters
+     * from the centroid of the other cluster.
      */
     AVERAGE_CENTROIDS_LINKAGE("Average centroids linkage");
 

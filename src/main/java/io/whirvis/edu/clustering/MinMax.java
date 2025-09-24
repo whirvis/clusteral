@@ -54,7 +54,7 @@ public final class MinMax {
 
         Iterator<T> elemsI = elems.iterator();
         if (!elemsI.hasNext()) {
-            String msg = "cannot find min with no elements";
+            String msg = "Cannot find min with no elements";
             throw new IllegalArgumentException(msg);
         }
 
@@ -98,7 +98,7 @@ public final class MinMax {
 
         Iterator<T> elemsI = elems.iterator();
         if (!elemsI.hasNext()) {
-            String msg = "cannot find max with no elements";
+            String msg = "Cannot find max with no elements";
             throw new IllegalArgumentException(msg);
         }
 
@@ -142,7 +142,7 @@ public final class MinMax {
 
         Iterator<T> elemsI = elems.iterator();
         if (!elemsI.hasNext()) {
-            String msg = "cannot find min or max with no elements";
+            String msg = "Cannot find min or max with no elements";
             throw new IllegalArgumentException(msg);
         }
         T first = elemsI.next();

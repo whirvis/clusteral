@@ -3,9 +3,15 @@
     <img src="https://i.imgur.com/I17fXM9.png" alt="Project logo"
         title="The aurora borealis, after running k-means clustering with k = 16"/></a>
 </div>
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=whirvis_clusteral"><img src="https://sonarcloud.io/api/project_badges/measure?project=whirvis_clusteral&metric=security_rating" alt="Security Rating"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=whirvis_clusteral"><img src="https://sonarcloud.io/api/project_badges/measure?project=whirvis_clusteral&metric=reliability_rating" alt="Reliability Rating"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=whirvis_clusteral"><img src="https://sonarcloud.io/api/project_badges/measure?project=whirvis_clusteral&metric=sqale_rating" alt="Reliability Rating"></a>
+</p>
 
-# The Project
+#
 
+### 🗒️ Summary
 This is the semester long project for a graduate class in
 [cluster analysis](https://en.wikipedia.org/wiki/Cluster_analysis) at my
 university. The code remains mostly unchanged since its final submission.

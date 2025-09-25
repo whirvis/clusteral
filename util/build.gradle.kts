@@ -1,1 +1,3 @@
-/* intentionally empty */
+plugins {
+    id("java-library")
+}

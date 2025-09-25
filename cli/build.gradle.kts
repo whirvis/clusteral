@@ -22,18 +22,18 @@ tasks.withType<JavaExec> {
     workingDir = rootProject.projectDir
 
     args = listOf(
-        "dataset.txt"      , /* F: name of the data file                */
-        "3"                 , /* K: number of clusters                   */
-        "1000"              , /* I: maximum number of iterations         */
-        "0.001"             , /* T: convergence threshold                */
-        "100"               , /* R: number of runs                       */
-        "random-selection"  , /* M: K-means initialization method        */
-        "min-max"           , /* N: normalization type                   */
-        "calinski-harabasz" , /* V: name of the cluster validator        */
-        "average"           , /* D: diameter calculation method          */
-        "single-linkage"    , /* L: linkage method, if necessary         */
-        "true"              , /* C: random centroids on multiple nearest */
-        "stdout"            , /* W: where to write program output        */
+        "datasets/sample.txt" , /* F: name of the data file                */
+        "3"                   , /* K: number of clusters                   */
+        "1000"                , /* I: maximum number of iterations         */
+        "0.001"               , /* T: convergence threshold                */
+        "100"                 , /* R: number of runs                       */
+        "random-selection"    , /* M: K-means initialization method        */
+        "min-max"             , /* N: normalization type                   */
+        "calinski-harabasz"   , /* V: name of the cluster validator        */
+        "average"             , /* D: diameter calculation method          */
+        "single-linkage"      , /* L: linkage method, if necessary         */
+        "true"                , /* C: random centroids on multiple nearest */
+        "stdout"              , /* W: where to write program output        */
     )
 }
 
